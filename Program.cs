@@ -2,17 +2,9 @@ using Microsoft.OpenApi.Models;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Step 1: Configure Logging (Serilog)
-Log.Logger = new LoggerConfiguration()
-    .WriteTo.File(
-        path: @"C:\GIT Hub\OpenAPIWithAuth\Logging\Logs\Log-.txt", // Add a "-" for daily rolling
-        rollingInterval: RollingInterval.Day
-    )
-    .CreateLogger();
+   
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog();
-builder.Logging.AddConsole(); // Optional: Additional console logging
 
 // Step 2: Configure Services
 builder.Services.AddControllers(); // Add Controllers for the API
@@ -72,7 +64,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection(); // Enforce HTTPS
 app.UseMiddleware<BasicAuthMiddleware>(); // Add Basic Authentication Middleware
-app.UseMiddleware<RequestResponseLoggingMiddleware>(); // Log Request/Response Middleware
+app.UseMiddleware<OpenAPIWithAuth.Logging.RequestResponseLoggingMiddleware>(); // Log Request/Response Middleware
 app.UseAuthorization(); // Add Authorization Middleware
 
 // Step 4: Map Controllers

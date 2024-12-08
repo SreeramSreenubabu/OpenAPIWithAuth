@@ -60,14 +60,12 @@ public class ApiController : ControllerBase
                 // Return the formatted date and time in the desired format
                 RequestTime = formattedRequestTime,
                 Status = "Success"
+                
             });
         }
         catch (Exception ex)
         {
             return StatusCode(500, new { Error = ex.Message });
         }
-    }
-
-    private bool IsAlphanumeric(string str) =>
-        Regex.IsMatch(str, "^[a-zA-Z0-9]+$");
+    }   
 }

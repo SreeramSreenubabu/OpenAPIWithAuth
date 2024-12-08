@@ -31,7 +31,7 @@ public class BasicAuthMiddleware
                 var username = credentials[0];
                 var password = credentials[1];
 
-                // Validate credentials (this is your hardcoded check for demo purposes)
+                // Validate credentials (this is your hardcoded check )
                 if (ValidateCredentials(username, password))
                 {
                     await _next(context);  // Credentials are valid, proceed to the next middleware
