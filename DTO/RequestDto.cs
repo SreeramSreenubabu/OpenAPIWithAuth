@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 
 public class RequestDto
 {
