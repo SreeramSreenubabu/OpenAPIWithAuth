@@ -22,10 +22,13 @@ namespace OpenAPIWithAuth.Logging
         {
             _next = next;  // Initialize the next middleware
             _logger = logger;  // Initialize the logger
-            _logFilePath = Path.Combine(Directory.GetCurrentDirectory(), "Logs", "Request-Response.log");
+            string logFileName = $"{DateTime.Now:dd/MM/yyyy}-Request-Response.log";
+            string logDirectory = Path.Combine(Directory.GetCurrentDirectory(), "Logs");
+            _logFilePath = Path.Combine(logDirectory, logFileName);
 
             // Ensure the "Logs" directory exists (create it if it doesn't)
-            Directory.CreateDirectory(Path.GetDirectoryName(_logFilePath));
+            Directory.CreateDirectory(logDirectory);
+
         }
 
         // This method is called for every HTTP request to log its details
