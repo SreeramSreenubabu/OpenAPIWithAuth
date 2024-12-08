@@ -5,6 +5,7 @@ var builder = WebApplication.CreateBuilder(args);
    
 builder.Logging.ClearProviders();
 builder.Logging.AddSerilog();
+builder.Logging.AddConsole();
 
 // Step 2: Configure Services
 builder.Services.AddControllers(); // Add Controllers for the API
