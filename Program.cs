@@ -3,23 +3,23 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure Serilog to log to a file
+// Step 1: Configure Logging (Serilog)
 Log.Logger = new LoggerConfiguration()
     .WriteTo.File(
-        path: @"C:\VS Code Projects\OpenApiWithAuth\Logging\Logs\Log-.txt", // Add a "-" for daily rolling
+        path: @"C:\GIT Hub\OpenAPIWithAuth\Logging\Logs\Log-.txt", // Add a "-" for daily rolling
         rollingInterval: RollingInterval.Day
-       // retainedFileCountLimit: 30 // Optional: Keep logs for 30 days
     )
     .CreateLogger();
+builder.Logging.ClearProviders();
+builder.Logging.AddSerilog();
+builder.Logging.AddConsole(); // Optional: Additional console logging
 
-// Add services to the container.
-builder.Services.AddControllers();
-builder.Logging.AddConsole();
-
-// Add Swagger services with Basic Authentication
+// Step 2: Configure Services
+builder.Services.AddControllers(); // Add Controllers for the API
+builder.Services.AddEndpointsApiExplorer(); // Enable Endpoints API Explorer
 builder.Services.AddSwaggerGen(options =>
 {
-    // Define the Basic Authentication scheme
+    // Define Basic Authentication scheme
     options.AddSecurityDefinition("BasicAuth", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
@@ -29,7 +29,7 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Basic Authentication with username and password"
     });
 
-    // Apply the Basic Authentication to all API operations
+    // Apply Basic Authentication to all API operations
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -45,6 +45,7 @@ builder.Services.AddSwaggerGen(options =>
         }
     });
 
+    // Configure Swagger document
     options.SwaggerDoc("v1", new OpenApiInfo
     {
         Title = "My API",
@@ -52,39 +53,30 @@ builder.Services.AddSwaggerGen(options =>
         Description = "A sample API for testing"
     });
 });
-// Add logging to the app
-builder.Logging.ClearProviders();
-builder.Logging.AddSerilog();
+
 var app = builder.Build();
-// Log the application's URLs
-var urls = app.Urls; // Get configured URLs (if any)
-Console.WriteLine($"Listening on: http://localhost:5238 (Default)");
-// Use Swagger in the request pipeline
+
+// Step 3: Configure Middleware and Pipeline
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(); // Enable Swagger in development environment
+    app.UseDeveloperExceptionPage(); // Show detailed error pages in development
+    app.UseSwagger(); // Enable Swagger for API documentation
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API v1");
-        c.RoutePrefix = string.Empty;  // Swagger UI at the root (optional)
-
-        // Disable the "Try it out" button for unauthorized users
-        c.OAuthClientId("your-client-id"); // Configure OAuth client (if using OAuth)
-        c.OAuthAppName("Swagger API");
-        c.DisplayRequestDuration();  // Show the request duration in Swagger UI
-
-        // This will disable the "Try it out" button for the PUT method
+        c.RoutePrefix = string.Empty; // Swagger UI at the root
         c.DocumentTitle = "API Documentation (Basic Auth Required)";
+        c.DisplayRequestDuration(); // Show request duration in Swagger UI
     });
 }
 
-// Add the BasicAuthMiddleware before UseAuthorization
-app.UseMiddleware<BasicAuthMiddleware>();
-app.UseMiddleware<RequestResponseLoggingMiddleware>();
+app.UseHttpsRedirection(); // Enforce HTTPS
+app.UseMiddleware<BasicAuthMiddleware>(); // Add Basic Authentication Middleware
+app.UseMiddleware<RequestResponseLoggingMiddleware>(); // Log Request/Response Middleware
+app.UseAuthorization(); // Add Authorization Middleware
 
-// Configure the HTTP request pipeline.
-app.UseAuthorization();
+// Step 4: Map Controllers
+app.MapControllers(); // Map API Controllers
 
-app.MapControllers();
-
+// Step 5: Run the Application
 app.Run();
